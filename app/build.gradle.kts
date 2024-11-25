@@ -78,6 +78,8 @@ dependencies {
     implementation(libs.glide)
     implementation(libs.glideCompose)
 
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+
 
 }
 

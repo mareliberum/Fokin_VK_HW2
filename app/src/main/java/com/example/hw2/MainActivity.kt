@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,12 +14,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -34,7 +37,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.example.hw2.Retrofit.RetrofitInstance
 import com.example.hw2.data.GiphyResponse
 import com.skydoves.landscapist.InternalLandscapistApi
@@ -70,18 +72,17 @@ fun GiphyAPI() {
                     list.add(element.images.original.url)
                 }
             }
-        }catch (e: Exception){
+        } catch (e: Exception) {
             isError = true
-        }
-        finally {
+        } finally {
             isLoading = false
         }
 
     }
-    if(isLoading){
+    if (isLoading) {
         Loading()
     }
-    if (isError){
+    if (isError) {
         Column(
             modifier = Modifier
                 .fillMaxSize(),
@@ -94,33 +95,38 @@ fun GiphyAPI() {
                 fontSize = 32.sp,
                 color = Color.Red,
             )
-           Button(
-               onClick ={
-                   isError = false
-               }
-           ) { Text(text = "Try Again")}
+            Button(
+                onClick = {
+                    isError = false
+                }
+            ) { Text(text = "Try Again") }
         }
     }
 
     Column {
 
-        LazyColumn() {
-            items(list) {
-                GlideImage(url = it)
-            }
-
-
-        }
+        LazyVerticalStaggeredGrid(
+            columns = StaggeredGridCells.Fixed(2),
+            verticalItemSpacing = 4.dp,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            content =
+            {
+                items(list) {
+                    GlideImage(url = it)
+                }
+            })
 
     }
+
+
 }
 
 @Composable
 fun Loading() {
-    Box (
+    Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
-    ){
+    ) {
 
         CircularProgressIndicator(
             modifier = Modifier.width(64.dp),
@@ -132,65 +138,58 @@ fun Loading() {
 
 }
 
-@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun GlideImage(url : String){
+fun GlideImage(url: String) {
 
-    var isLoading by remember { mutableStateOf(true) }
-    if (isLoading) {
-        CircularProgressIndicator(
-            modifier = Modifier
-                .width(24.dp)
-                .height(24.dp),
-            color = MaterialTheme.colorScheme.onPrimary, // Индикатор контрастного цвета
-            strokeWidth = 2.dp
-        )
+    var tryAgaing by remember { mutableStateOf(false) }
+
+
+    LaunchedEffect(tryAgaing) {
+
+
     }
+    Surface(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(4.dp)
+            .border(1.5.dp,
+                Color.White,
+                RoundedCornerShape(12.dp)),
+        shape = MaterialTheme.shapes.medium,
+        shadowElevation = 1.dp
+    ) {
+        com.skydoves.landscapist.glide.GlideImage(
+            imageModel = { url },
+            modifier = Modifier
+                .fillMaxSize(),
 
-//    GlideImage(
-//        model = url,
-//        contentDescription = "gif",
-//        contentScale = ContentScale.Crop,
-//        modifier = Modifier.fillMaxSize().padding(4.dp).clickable { },
-//        loading = placeholder(R.drawable.placeholder),
-//        failure = placeholder(R.drawable.placeholder),
-//
-//    )
-    com.skydoves.landscapist.glide.GlideImage(
-        imageModel = {url},
-        modifier = Modifier.fillMaxSize().padding(4.dp),
-
-        loading = {
-            Box(modifier = Modifier.wrapContentSize()){
-                run{
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .width(24.dp)
-                            .height(24.dp),
-                        color = Color.Black, // Индикатор контрастного цвета
-                        strokeWidth = 4.dp
-                    )
+            loading = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .height(200.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    run {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .width(24.dp)
+                                .height(24.dp),
+                            color = Color.Black, // Индикатор контрастного цвета
+                            strokeWidth = 4.dp
+                        )
+                    }
+                }
+            },
+            failure = {
+                Column(modifier = Modifier.fillMaxSize())
+                {
+                    Button(modifier = Modifier.fillMaxSize(), onClick = { tryAgaing = true }) {
+                        Text(text = "reload")
+                    }
                 }
             }
-
-        },
-    )
-
-//    com.skydoves.landscapist.coil.CoilImage(
-//        imageModel = {url},
-//        loading = {
-//            run {
-//                CircularProgressIndicator(
-//                    modifier = Modifier
-//                        .width(24.dp)
-//                        .height(24.dp),
-//                    color = MaterialTheme.colorScheme.onPrimary, // Индикатор контрастного цвета
-//                    strokeWidth = 2.dp
-//                )
-//            }
-//        },
-//
-//    )
-
+        )
+    }
 
 }

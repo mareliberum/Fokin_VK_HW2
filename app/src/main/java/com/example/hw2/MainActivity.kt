@@ -1,3 +1,5 @@
+@file:OptIn(InternalLandscapistApi::class)
+
 package com.example.hw2
 
 import android.os.Bundle
@@ -7,11 +9,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
@@ -28,16 +30,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
-import com.bumptech.glide.integration.compose.GlideImage
-import com.bumptech.glide.integration.compose.placeholder
 import com.example.hw2.Retrofit.RetrofitInstance
 import com.example.hw2.data.GiphyResponse
+import com.skydoves.landscapist.InternalLandscapistApi
 import kotlinx.coroutines.coroutineScope
 
 const val API_KEY = "VSdGE1dpdOvi2oLxen5sjNdg52Pj7ZEb"
@@ -60,6 +60,7 @@ class MainActivity : ComponentActivity() {
 fun GiphyAPI() {
     val list = remember { mutableStateListOf<String>() }
     var isError by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(true) }
 
     LaunchedEffect(isError) {
         try {
@@ -72,9 +73,14 @@ fun GiphyAPI() {
         }catch (e: Exception){
             isError = true
         }
+        finally {
+            isLoading = false
+        }
 
     }
-
+    if(isLoading){
+        Loading()
+    }
     if (isError){
         Column(
             modifier = Modifier
@@ -103,6 +109,7 @@ fun GiphyAPI() {
                 GlideImage(url = it)
             }
 
+
         }
 
     }
@@ -110,20 +117,18 @@ fun GiphyAPI() {
 
 @Composable
 fun Loading() {
-//    var loading by remember { mutableStateOf(false) }
-//
-//    Button(onClick = { loading = true }, enabled = !loading) {
-//        Text("Start loading")
-//    }
-//
-//    if (!loading) return
+    Box (
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ){
 
-    CircularProgressIndicator(
-        modifier = Modifier.width(64.dp),
-        color = MaterialTheme.colorScheme.secondary,
-        trackColor = MaterialTheme.colorScheme.surfaceVariant,
+        CircularProgressIndicator(
+            modifier = Modifier.width(64.dp),
+            color = MaterialTheme.colorScheme.secondary,
+            trackColor = MaterialTheme.colorScheme.surfaceVariant,
 
-    )
+            )
+    }
 
 }
 
@@ -142,13 +147,50 @@ fun GlideImage(url : String){
         )
     }
 
-    GlideImage(
-        model = url,
-        contentDescription = "gif",
-        contentScale = ContentScale.Crop,
+//    GlideImage(
+//        model = url,
+//        contentDescription = "gif",
+//        contentScale = ContentScale.Crop,
+//        modifier = Modifier.fillMaxSize().padding(4.dp).clickable { },
+//        loading = placeholder(R.drawable.placeholder),
+//        failure = placeholder(R.drawable.placeholder),
+//
+//    )
+    com.skydoves.landscapist.glide.GlideImage(
+        imageModel = {url},
         modifier = Modifier.fillMaxSize().padding(4.dp),
-        loading = placeholder(R.drawable.placeholder),
-        failure = placeholder(R.drawable.placeholder),
+
+        loading = {
+            Box(modifier = Modifier.wrapContentSize()){
+                run{
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .width(24.dp)
+                            .height(24.dp),
+                        color = Color.Black, // Индикатор контрастного цвета
+                        strokeWidth = 4.dp
+                    )
+                }
+            }
+
+        },
     )
+
+//    com.skydoves.landscapist.coil.CoilImage(
+//        imageModel = {url},
+//        loading = {
+//            run {
+//                CircularProgressIndicator(
+//                    modifier = Modifier
+//                        .width(24.dp)
+//                        .height(24.dp),
+//                    color = MaterialTheme.colorScheme.onPrimary, // Индикатор контрастного цвета
+//                    strokeWidth = 2.dp
+//                )
+//            }
+//        },
+//
+//    )
+
 
 }

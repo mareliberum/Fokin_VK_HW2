@@ -62,6 +62,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.constraintlayout)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -79,6 +80,9 @@ dependencies {
     implementation(libs.glideCompose)
 
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+    implementation("io.coil-kt.coil3:coil-compose:3.0.4")
+    implementation("com.github.skydoves:landscapist-glide:2.4.4")
+    implementation("com.github.skydoves:landscapist-coil:2.4.4")
 
 
 }
